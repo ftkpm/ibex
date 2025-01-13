@@ -314,7 +314,11 @@ module ibex_id_stage #(
   // Main ALU MUX for Operand A
   always_comb begin : alu_operand_a_mux
     unique case (alu_op_a_mux_sel)
-      OP_A_REG_A:  alu_operand_a = rf_rdata_a_fwd;
+    //Level 2 bug
+      OP_A_REG_A:  alu_operand_a = rf_rdata_b_fwd;
+    //       OP_A_REG_A:  alu_operand_a = rf_rdata_a_fwd;
+
+    // 
       OP_A_FWD:    alu_operand_a = lsu_addr_last_i;
       OP_A_CURRPC: alu_operand_a = pc_id_i;
       OP_A_IMM:    alu_operand_a = imm_a;
@@ -326,7 +330,10 @@ module ibex_id_stage #(
     // Branch target ALU operand A mux
     always_comb begin : bt_operand_a_mux
       unique case (bt_a_mux_sel)
-        OP_A_REG_A:  bt_a_operand_o = rf_rdata_a_fwd;
+      //level 2 bug
+        OP_A_REG_A:  bt_a_operand_o = rf_rdata_b_fwd;
+        // OP_A_REG_A:  bt_a_operand_o = rf_rdata_a_fwd;
+      //
         OP_A_CURRPC: bt_a_operand_o = pc_id_i;
         default:     bt_a_operand_o = pc_id_i;
       endcase
@@ -1005,7 +1012,10 @@ module ibex_id_stage #(
     // If instruction is read register that writeback is writing forward writeback data to read
     // data. Note this doesn't factor in load data as it arrives too late, such hazards are
     // resolved via a stall (see above).
-    assign rf_rdata_a_fwd = rf_rd_a_wb_match & rf_write_wb_i ? rf_wdata_fwd_wb_i : rf_rdata_a_i;
+    //Level 2 bug
+    assign rf_rdata_b_fwd = rf_rd_a_wb_match & rf_write_wb_i ? rf_wdata_fwd_wb_i : rf_rdata_a_i;
+    // assign rf_rdata_a_fwd = rf_rd_a_wb_match & rf_write_wb_i ? rf_wdata_fwd_wb_i : rf_rdata_a_i;
+// 
     assign rf_rdata_b_fwd = rf_rd_b_wb_match & rf_write_wb_i ? rf_wdata_fwd_wb_i : rf_rdata_b_i;
 
     assign stall_ld_hz = outstanding_load_wb_i & (rf_rd_a_hz | rf_rd_b_hz);
